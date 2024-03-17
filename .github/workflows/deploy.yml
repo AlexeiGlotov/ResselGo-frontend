@@ -1,0 +1,46 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH connection
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+
+      - name: Stop docker , delete app
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} lexa@${{ secrets.SERVER_IP }} "cd /root/app && docker compose down && rm -r /root/app"
+
+      - name: Copy files to server
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }}" ./ lexa@${{ secrets.SERVER_IP }}:/root/app
+
+      - name: Create .env files
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} lexa@${{ secrets.SERVER_IP }} "\
+          echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' > /root/app/.env && \
+          echo 'DB_HOST=${{ secrets.DB_HOST }}' >> /root/app/.env && \
+          echo 'REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}' >> /root/app/.env"
+          echo 'SALT_PASSWORD=${{ secrets.SALT_PASSWORD }}' >> /root/app/.env"
+          echo 'SALT_JWT=${{ secrets.SALT_JWT }}' >> /root/app/.env"
+
+      - name: Build docker compose
+        run: ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} lexa@${{ secrets.SERVER_IP }} "cd /root/app && docker compose up -d --build"
+
+      - name: Check Status
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} lexa@${{ secrets.SERVER_IP }} "\
+          cd /root/app && \
+          docker compose ps"

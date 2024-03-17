@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: react-nginx
+    ports:
+      - '23478:80'
+    restart: on-failure

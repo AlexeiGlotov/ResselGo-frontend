@@ -3,7 +3,7 @@ import {axiosInstanceWithJWT} from '../api/axios';
 import React, {useState, useEffect, useContext} from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import handleError from '../utils/errorHandler';
-import { Button, Form, Table, Pagination,Container,Card } from 'react-bootstrap';
+import { Button, Form, Table, Pagination,Container,Card,Tooltip, Overlay  } from 'react-bootstrap';
 import {AuthContext} from "./AuthContext";
 
 
@@ -14,6 +14,15 @@ function ListLicenseKeys() {
     const [currentPage, setCurrentPage] = useState(1);
     const [filter, setFilter] = useState('');
     const [serverFilter, setServerFilter] = useState("");
+    const [tooltip, setTooltip] = useState({ show: false, target: null, text: '' });
+
+    const showTooltip = (event, text) => {
+        setTooltip({ show: true, target: event.target, text });
+    };
+
+    const hideTooltip = () => {
+        setTooltip({ show: false, target: null, text: '' });
+    };
 
     useEffect(() => {
         const fetchLicenseKeys = async () => {
@@ -186,7 +195,13 @@ function ListLicenseKeys() {
                             filteredLicenseKeys.filter(key => key.is_deleted !== 1).map(key => (
                                 <tr key={key.id}>
                                     <td>{key.id}</td>
-                                    <td style={cellStyle}>{key.license_key}</td>
+                                    <td
+                                        style={cellStyle}
+                                        onMouseEnter={e => showTooltip(e, key.license_key)}
+                                        onMouseLeave={hideTooltip}
+                                    >
+                                        {key.license_key}
+                                    </td>
                                     <td>{key.cheat}</td>
                                     <td>{key.ttl_cheat}</td>
                                     <td>{key.holder}</td>
@@ -251,6 +266,17 @@ function ListLicenseKeys() {
                             </tbody>
                         </Table>
                 </Card>
+
+                <Overlay
+                    show={tooltip.show}
+                    target={tooltip.target}
+                    placement="top"
+                >
+                    <Tooltip id="license-key-tooltip">
+                        {tooltip.text}
+                    </Tooltip>
+                </Overlay>
+
             </Container>
     )
     };

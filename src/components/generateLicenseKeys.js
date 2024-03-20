@@ -12,7 +12,7 @@ function GenerateLicenseKeys() {
     const [cheats, setCheats] = useState([]);
     const [users, setUsers] = useState([]);
     const [subsCount, setSubsCount] = useState(1);
-    const [daysCount, setDaysCount] = useState(25);
+    const [daysCount, setDaysCount] = useState(1);
     const [selectedCheat, setSelectedCheat] = useState('');
     const [selectedUser, setSelectedUser] = useState('');
     const [selectedNotes, setNotes] = useState('');
@@ -97,19 +97,45 @@ function GenerateLicenseKeys() {
                                 <InputGroup>
                                     <Form.Control
                                         type="range"
-                                        min="1"  max={role === "admin" ? "50" : "5"}
+                                        min="1" max={role === "admin" ? "9999" : "500"}
                                         value={subsCount}
-                                        onChange={(e) => setSubsCount(e.target.value)} />
-                                    <InputGroup.Text>{subsCount} subs</InputGroup.Text>
+                                        onChange={(e) => setSubsCount(e.target.value)}
+                                    />
+                                    <Form.Control
+                                        type="text"
+                                        value={subsCount}
+                                        onChange={(e) => {
+                                            const val = Math.max(1, Math.min(e.target.value, role === "admin" ? 9999 : 500));
+                                            setSubsCount(val);
+                                        }}
+                                        style={{ width: '10px' }}
+                                    />
+                                    <InputGroup.Text>subs</InputGroup.Text>
                                 </InputGroup>
                             </Col>
 
+
                             <Col md={3}>
                                 <InputGroup>
-                                    <Form.Control type="range" min="1" max="30" value={daysCount} onChange={(e) => setDaysCount(e.target.value)} />
-                                    <InputGroup.Text>{daysCount} day</InputGroup.Text>
+                                    <Form.Control
+                                        type="range"
+                                        min="1" max={role === "admin" ? "9999" : "24"}
+                                        value={daysCount}
+                                        onChange={(e) => setDaysCount(e.target.value)}
+                                    />
+                                    <Form.Control
+                                        type="text"
+                                        value={daysCount}
+                                        onChange={(e) => {
+                                            const val = Math.max(1, Math.min(e.target.value, role === "admin" ? 9999 : 24));
+                                            setDaysCount(val);
+                                        }}
+                                        style={{ width: '10px' }}
+                                    />
+                                    <InputGroup.Text>hours</InputGroup.Text>
                                 </InputGroup>
                             </Col>
+
 
 
                         </Row>
